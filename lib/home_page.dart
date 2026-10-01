@@ -109,23 +109,23 @@ class _HomePageState extends State<HomePage> {
     return '$euros.${cents.toString().padLeft(2, '0')}';
   }
 
-String setTitle(bool b, bool isAddCard) {
+  String setTitle(bool b, bool isAddCard) {
     String title = isAddCard ? 'Add Card' : 'Digital Wallet';
     if (b) {
       title = "Send";
     }
 
     return title;
-}
-
-IconData setIcon(bool b, bool isAddCard) {
-  IconData icon = isAddCard ? Icons.add_card : Icons.wallet;
-  if (b) {
-    icon = Icons.arrow_upward_rounded;
   }
 
-  return icon;
-}
+  IconData setIcon(bool b, bool isAddCard) {
+    IconData icon = isAddCard ? Icons.add_card : Icons.wallet;
+    if (b) {
+      icon = Icons.arrow_upward_rounded;
+    }
+
+    return icon;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -153,10 +153,7 @@ IconData setIcon(bool b, bool isAddCard) {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         spacing: 4,
                         children: [
-                          Icon(
-                            setIcon(showSendPage, isAddCard),
-                            size: 24,
-                          ),
+                          Icon(setIcon(showSendPage, isAddCard), size: 24),
                           Text(
                             setTitle(showSendPage, isAddCard),
                             textAlign: TextAlign.left,
@@ -189,7 +186,9 @@ IconData setIcon(bool b, bool isAddCard) {
                     child: PageView.builder(
                       clipBehavior: Clip.none,
                       controller: _pageController,
-                      itemCount: showSendPage ? myCards.length : myCards.length + 1,
+                      itemCount: showSendPage
+                          ? myCards.length
+                          : myCards.length + 1,
                       itemBuilder: (context, index) {
                         final isAddCardItem = index == myCards.length;
 
@@ -337,7 +336,7 @@ IconData setIcon(bool b, bool isAddCard) {
                                     date: DateTime.now(),
                                   ),
                                 ],
-                              )
+                              ),
                             ],
                           ),
                         ),
@@ -345,11 +344,13 @@ IconData setIcon(bool b, bool isAddCard) {
                     ),
 
                   if (showSendPage)
-                    SendPage(onExit: () {
-                      setState(() {
-                        showSendPage = false;
-                      });
-                    },),
+                    SendPage(
+                      onExit: () {
+                        setState(() {
+                          showSendPage = false;
+                        });
+                      },
+                    ),
 
                   if (showMenu) ...[
                     SizedBox(height: 30),
