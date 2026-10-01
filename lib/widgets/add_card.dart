@@ -26,17 +26,27 @@ class AddCard extends StatelessWidget {
     final digitsOnly = number.replaceAll(' ', '');
     if (digitsOnly.length < 4) return number;
 
-    var finalNumber = "";
+    final maskedLength = digitsOnly.length - 4;
+    final masked = '*' * maskedLength;
+    final lastFour = digitsOnly.substring(digitsOnly.length - 4);
+    final combined = masked + lastFour;
 
-    for (int i = 0; i < digitsOnly.length - 4; i++) {
-      finalNumber += "*";
-      if ((i + 1) % 4 == 0 && i + 1 != digitsOnly.length) {
-        finalNumber += " ";
+    final buffer = StringBuffer();
+
+    for (int i = 0; i < combined.length; i++) {
+      buffer.write(combined[i]);
+      if ((i + 1) % 4 == 0 && i + 1 != combined.length) {
+        buffer.write(' ');
       }
     }
 
-    final lastFour = digitsOnly.substring(digitsOnly.length - 4);
-    return finalNumber + lastFour;
+    return buffer.toString();
+  }
+
+  String maskCvv(String number) {
+    final digitsOnly = number.replaceAll(' ', '');
+    final masked = "*" * digitsOnly.length;
+    return masked;
   }
   
   @override
@@ -116,7 +126,7 @@ class AddCard extends StatelessWidget {
                 children: [
                   const Icon(Icons.euro, size: 32, color: Colors.white),
                   Text(
-                    balance,
+                    "0,00",
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 32,
@@ -160,7 +170,7 @@ class AddCard extends StatelessWidget {
                         style: TextStyle(color: Colors.white70, fontSize: 12),
                       ),
                       Text(
-                        cvv,
+                        maskCvv(cvv),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 14,

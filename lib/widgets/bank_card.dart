@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class BankCard extends StatelessWidget {
+class BankCard extends StatefulWidget {
   final String cardName;
   final String cardNumber;
   final String balance;
@@ -15,24 +15,51 @@ class BankCard extends StatelessWidget {
     required this.balance,
     required this.holderName,
     required this.expDate,
-    required this.cvv
+    required this.cvv,
   });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'cardName': cardName,
+      'cardNumber': cardNumber,
+      'balance': balance,
+      'holderName': holderName,
+      'expDate': expDate,
+      'cvv': cvv,
+    };
+  }
+
+  factory BankCard.fromJson(Map<String, dynamic> json) {
+    return BankCard(
+      cardName: json['cardName'],
+      cardNumber: json['cardNumber'],
+      balance: json['balance'],
+      holderName: json['holderName'],
+      expDate: json['expDate'],
+      cvv: json['cvv'],
+    );
+  }
+
+  @override
+  State<BankCard> createState() => _BankCardState();
+}
+
+class _BankCardState extends State<BankCard> {
+  bool _showCardNumber = false;
+  bool _showCvv = false;
 
   String maskCardNumber(String number) {
     final digitsOnly = number.replaceAll(' ', '');
     if (digitsOnly.length < 4) return number;
 
-    var finalNumber = "";
-
-    for (int i = 0; i < digitsOnly.length - 4; i++) {
-      finalNumber += "*";
-      if ((i + 1) % 4 == 0 && i + 1 != digitsOnly.length) {
-        finalNumber += " ";
-      }
-    }
-
     final lastFour = digitsOnly.substring(digitsOnly.length - 4);
-    return finalNumber + lastFour;
+    return '**** **** **** $lastFour';
+  }
+
+  String maskCvv(String number) {
+    final digitsOnly = number.replaceAll(' ', '');
+    final masked = "*" * digitsOnly.length;
+    return masked;
   }
 
   @override
@@ -58,7 +85,7 @@ class BankCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                cardName,
+                widget.cardName,
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 14,
@@ -66,12 +93,40 @@ class BankCard extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 4),
-              Text(
-                maskCardNumber(cardNumber),
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
+              GestureDetector(
+                onTapDown: (_) {
+                  setState(() {
+                    _showCardNumber = true;
+                  });
+                },
+                onTapUp: (_) {
+                  setState(() {
+                    _showCardNumber = false;
+                  });
+                },
+                onTapCancel: () {
+                  setState(() {
+                    _showCardNumber = false;
+                  });
+                },
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  spacing: 4,
+                  children: [
+                    Text(
+                      _showCardNumber ? widget.cardNumber : maskCardNumber(widget.cardNumber),
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Icon(
+                      _showCardNumber ? Icons.visibility_off : Icons.visibility,
+                      size: 16,
+                      color: Colors.white70,
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -90,13 +145,9 @@ class BankCard extends StatelessWidget {
               ),
               Row(
                 children: [
-                  Icon(
-                    Icons.euro,
-                    size: 32,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  Icon(Icons.euro, size: 32, fontWeight: FontWeight.bold),
                   Text(
-                    balance,
+                    widget.balance,
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 32,
@@ -124,7 +175,7 @@ class BankCard extends StatelessWidget {
                     ),
                   ),
                   Text(
-                   holderName,
+                    widget.holderName,
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,
@@ -137,8 +188,7 @@ class BankCard extends StatelessWidget {
                 spacing: 32,
                 children: [
                   Column(
-                    crossAxisAlignment:
-                    CrossAxisAlignment.end,
+                    crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
                         "CVV",
@@ -148,19 +198,48 @@ class BankCard extends StatelessWidget {
                           fontWeight: FontWeight.normal,
                         ),
                       ),
-                      Text(
-                        cvv,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
+                      GestureDetector(
+                        onTapDown: (_) {
+                          setState(() {
+                            _showCvv = true;
+                          });
+                        },
+                        onTapUp: (_) {
+                          setState(() {
+                            _showCvv = false;
+                          });
+                        },
+                        onTapCancel: () {
+                          setState(() {
+                            _showCvv = false;
+                          });
+                        },
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          spacing: 4,
+                          children: [
+
+                            Text(
+                              _showCvv ? widget.cvv : maskCvv(widget.cvv),
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Icon(
+                              _showCvv ? Icons.visibility_off : Icons.visibility,
+                              size: 16,
+                              color: Colors.white70,
+
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
                   Column(
-                    crossAxisAlignment:
-                    CrossAxisAlignment.end,
+                    crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
                         "Exp. Date",
@@ -171,7 +250,7 @@ class BankCard extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        expDate,
+                        widget.expDate,
                         style: TextStyle(
                           color: Colors.white70,
                           fontSize: 14,
