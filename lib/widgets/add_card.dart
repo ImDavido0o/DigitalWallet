@@ -126,7 +126,7 @@ class AddCard extends StatelessWidget {
                 children: [
                   const Icon(Icons.euro, size: 32, color: Colors.white),
                   Text(
-                    "0,00",
+                    "0.00",
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 32,

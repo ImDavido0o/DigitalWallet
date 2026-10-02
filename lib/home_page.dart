@@ -19,6 +19,9 @@ import 'dart:convert';
 
 import 'package:digital_wallet/widgets/action_button.dart';
 
+import 'models/contact.dart';
+import 'models/transaction.dart';
+
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -28,7 +31,9 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   List<BankCard> myCards = [];
+  List<Transaction> _currentTransactions = [];
 
+  // Save and Load Cards
   Future<void> _saveCards() async {
     final prefs = await SharedPreferences.getInstance();
     final jsonList = myCards.map((card) => card.toJson()).toList();
@@ -48,15 +53,90 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  // Save and Load Transactions
+  Future<void> _initTransactionsIfNeeded() async {
+    final prefs = await SharedPreferences.getInstance();
+    final hasInitialized = prefs.getBool('transactions_initialized') ?? false;
+
+    if (!hasInitialized) {
+      final jsonString = await rootBundle.loadString("/Users/mac/Desktop/DigitalWallet/lib/assets/transactions.json");
+      await prefs.setString('all_transactions', jsonString);
+      await prefs.setBool('transactions_initialized', true);
+    }
+  }
+
+  Future<void> _loadTransactionsForCard(String cardNumber) async {
+    final prefs = await SharedPreferences.getInstance();
+    final jsonString = prefs.getString('all_transactions') ?? '{}';
+    final jsonMap = jsonDecode(jsonString) as Map<String, dynamic>;
+
+    final cleanCardNumber = cardNumber.replaceAll(' ', '');
+    final cardTransactions = jsonMap[cleanCardNumber] as List? ?? [];
+
+    setState(() {
+      _currentTransactions =
+          cardTransactions.map((json) => Transaction.fromJson(json)).toList();
+    });
+  }
+
+  Future<void> _addTransactionForCard(String cardNumber, Transaction transaction) async {
+    final prefs = await SharedPreferences.getInstance();
+    final jsonString = prefs.getString('all_transactions') ?? '{}';
+    final jsonMap = jsonDecode(jsonString) as Map<String, dynamic>;
+
+    final cleanCardNumber = cardNumber.replaceAll(' ', '');
+    final existing = (jsonMap[cleanCardNumber] as List?) ?? [];
+    existing.insert(0, transaction.toJson());
+    jsonMap[cleanCardNumber] = existing;
+
+    await prefs.setString('all_transactions', jsonEncode(jsonMap));
+  }
+
+  void _sendMoney(Contact contact, double amount) {
+    final currentCard = myCards[_currentPage];
+    final currentBalance = double.parse(currentCard.balance);
+
+    if (amount > currentBalance) {
+      print('Nedostatok peňazí');
+      return;
+    }
+
+    final newBalance = currentBalance - amount;
+    final newTransaction = Transaction(
+      name: contact.name,
+      amount: amount,
+      balance: newBalance,
+      plus: false,
+      date: DateTime.now(),
+    );
+
+    setState(() {
+      myCards[_currentPage] = BankCard(
+        cardName: currentCard.cardName,
+        cardNumber: currentCard.cardNumber,
+        balance: newBalance.toStringAsFixed(2),
+        holderName: currentCard.holderName,
+        expDate: currentCard.expDate,
+        cvv: currentCard.cvv,
+      );
+
+      _currentTransactions.insert(0, newTransaction);
+      showSendPage = false;
+    });
+
+    _saveCards();
+    _addTransactionForCard(currentCard.cardNumber, newTransaction);
+  }
+
   late final PageController _pageController;
   int _currentPage = 0;
   bool showMenu = false;
   bool _showCvv = false;
 
   bool showSendPage = false;
-
-  // test
-  final now = DateTime.now();
+  bool showRequestPage = false;
+  bool showTopUpPage = false;
+  bool showMorePage = false;
 
   final TextEditingController _cardNameController = TextEditingController();
   final TextEditingController _cardNumberController = TextEditingController();
@@ -68,7 +148,12 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    _loadCards();
+    _loadCards().then((_) async {
+      await _initTransactionsIfNeeded();
+      if (myCards.isNotEmpty) {
+        _loadTransactionsForCard(myCards[0].cardNumber);
+      }
+    });
     _pageController = PageController(viewportFraction: 0.99);
     _pageController.addListener(() {
       final newPage = _pageController.page?.round() ?? 0;
@@ -77,6 +162,10 @@ class _HomePageState extends State<HomePage> {
           _currentPage = newPage;
           showMenu = false;
         });
+
+        if (newPage < myCards.length) {
+          _loadTransactionsForCard(myCards[newPage].cardNumber);
+        }
       }
     });
   }
@@ -112,7 +201,7 @@ class _HomePageState extends State<HomePage> {
   String setTitle(bool b, bool isAddCard) {
     String title = isAddCard ? 'Add Card' : 'Digital Wallet';
     if (b) {
-      title = "Send";
+      //title = "Send";
     }
 
     return title;
@@ -121,11 +210,12 @@ class _HomePageState extends State<HomePage> {
   IconData setIcon(bool b, bool isAddCard) {
     IconData icon = isAddCard ? Icons.add_card : Icons.wallet;
     if (b) {
-      icon = Icons.arrow_upward_rounded;
+      //icon = Icons.arrow_upward_rounded;
     }
 
     return icon;
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -194,7 +284,7 @@ class _HomePageState extends State<HomePage> {
 
                         if (isAddCardItem) {
                           return Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
                             child: AddCard(
                               onTap: () {
                                 setState(() {
@@ -280,9 +370,7 @@ class _HomePageState extends State<HomePage> {
                             ActionButton(
                               icon: Icons.more_horiz_rounded,
                               label: 'More',
-                              onTap: () {
-                                // logika
-                              },
+                              onTap: () {},
                             ),
                           ],
                         ),
@@ -321,20 +409,14 @@ class _HomePageState extends State<HomePage> {
                               Column(
                                 spacing: 8,
                                 children: [
-                                  TransfersCard(
-                                    name: 'George Miler',
-                                    amount: 1000,
-                                    balance: 3187.23,
-                                    plus: true,
-                                    date: DateTime.now(),
-                                  ),
-                                  TransfersCard(
-                                    name: 'George Miler',
-                                    amount: 150,
-                                    balance: 3037.23,
-                                    plus: false,
-                                    date: DateTime.now(),
-                                  ),
+                                  for (final t in _currentTransactions)
+                                    TransfersCard(
+                                      name: t.name,
+                                      amount: t.amount,
+                                      balance: t.balance,
+                                      plus: t.plus,
+                                      date: t.date,
+                                    ),
                                 ],
                               ),
                             ],
@@ -349,6 +431,9 @@ class _HomePageState extends State<HomePage> {
                         setState(() {
                           showSendPage = false;
                         });
+                      },
+                      onSend: (contact, amount) {
+                        _sendMoney(contact, amount);
                       },
                     ),
 

@@ -31,7 +31,6 @@ class TransfersCard extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // LEFT SIDE
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -74,7 +73,6 @@ class TransfersCard extends StatelessWidget {
             ],
           ),
 
-          // RIGHT SIDE
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [

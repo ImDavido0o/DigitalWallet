@@ -1,0 +1,50 @@
+[
+  {
+    "id": "1",
+    "name": "George Miller",
+    "initials": "GM",
+    "accountNumber": "SK89 7500 0000 0012 3456 7890"
+  },
+  {
+    "id": "2",
+    "name": "Sarah Johnson",
+    "initials": "SJ",
+    "accountNumber": "SK24 1100 0000 0098 7654 3210"
+  },
+  {
+    "id": "3",
+    "name": "Michael Brown",
+    "initials": "MB",
+    "accountNumber": "SK56 0900 0000 0055 4433 2211"
+  },
+  {
+    "id": "4",
+    "name": "Emma Wilson",
+    "initials": "EW",
+    "accountNumber": "SK33 8330 0000 0021 1122 3344"
+  },
+  {
+    "id": "5",
+    "name": "James Carter",
+    "initials": "JC",
+    "accountNumber": "SK77 0200 0000 0019 8877 6655"
+  },
+  {
+    "id": "6",
+    "name": "Olivia Davis",
+    "initials": "OD",
+    "accountNumber": "SK15 6500 0000 0044 5566 7788"
+  },
+  {
+    "id": "7",
+    "name": "Daniel Martinez",
+    "initials": "DM",
+    "accountNumber": "SK42 3100 0000 0077 8899 0011"
+  },
+  {
+    "id": "8",
+    "name": "Sophia Anderson",
+    "initials": "SA",
+    "accountNumber": "SK68 1000 0000 0033 2211 4455"
+  }
+]
